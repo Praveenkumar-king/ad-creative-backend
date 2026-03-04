@@ -12,7 +12,7 @@
   "description": "",
   "dependencies": {
     "@huggingface/inference": "^4.13.12",
-    "axios": "^1.13.5",
+    "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.70.0",
     "canvas": "^2.11.2",
