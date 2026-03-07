@@ -1,21 +1,41 @@
-// src/middleware/authMiddleware.js
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-export const protect = async (req, res, next) => {
-  try {
-    const auth = req.headers.authorization;
-    if (!auth || !auth.startsWith("Bearer ")) return res.status(401).json({ error: "Not authorized" });
+export const protect = async (req,res,next)=>{
 
-    const token = auth.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  try{
+
+    const token = req.cookies.token;
+
+    if(!token){
+      return res.status(401).json({
+        error:"Not authorized"
+      });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
     const user = await User.findById(decoded.id);
-    if (!user) return res.status(401).json({ error: "Not authorized" });
+
+    if(!user){
+      return res.status(401).json({
+        error:"User not found"
+      });
+    }
 
     req.user = user;
+
     next();
-  } catch (err) {
-    console.error("Protect Error:", err);
-    res.status(401).json({ error: "Not authorized" });
+
+  }catch(err){
+
+    return res.status(401).json({
+      error:"Invalid token"
+    });
+
   }
+
 };

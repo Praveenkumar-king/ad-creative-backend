@@ -1,30 +1,116 @@
 // src/models/User.js
+
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  name: { type: String },
-  email: { type: String, required: true, unique: true, lowercase: true },
-  password: { type: String, required: true },
-  isVerified: { type: Boolean, default: false },
 
-  // hashed tokens stored (sha256 hash of token)
-  verificationToken: { type: String },
-  verificationExpire: { type: Date },
+  /* ======================
+     BASIC USER INFO
+  ====================== */
 
-  resetPasswordToken: { type: String },
-  resetPasswordExpire: { type: Date },
+  name:{
+    type:String
+  },
 
-  // login lock / attempts
-  failedLoginAttempts: { type: Number, default: 0 },
-  lockUntil: { type: Date },
+  email:{
+    type:String,
+    required:true,
+    unique:true,
+    lowercase:true
+  },
 
-  createdAt: { type: Date, default: Date.now }
+  password:{
+    type:String,
+    required:true
+  },
+
+  role:{
+    type:String,
+    default:"user"
+  },
+
+  isVerified:{
+    type:Boolean,
+    default:false
+  },
+
+
+  /* ======================
+     USER CREDITS SYSTEM
+  ====================== */
+
+  credits:{
+    type:Number,
+    default:30
+  },
+
+
+  /* ======================
+     SUBSCRIPTION PLAN
+  ====================== */
+
+  plan:{
+    type:String,
+    default:"Free"
+  },
+
+  planExpire:{
+    type:Date
+  },
+
+
+  /* ======================
+     PROFILE PICTURE
+  ====================== */
+
+  avatar:{
+    type:String,
+    default:""
+  },
+
+
+  /* ======================
+     EMAIL VERIFICATION
+  ====================== */
+
+  verificationToken:String,
+  verificationExpire:Date,
+
+
+  /* ======================
+     PASSWORD RESET / OTP
+  ====================== */
+
+  resetPasswordToken:String,
+  resetPasswordExpire:Date,
+
+  otpAttempts:{
+    type:Number,
+    default:0
+  },
+
+
+  /* ======================
+     LOGIN SECURITY
+  ====================== */
+
+  failedLoginAttempts:{
+    type:Number,
+    default:0
+  },
+
+  lockUntil:Date,
+
+
+  /* ======================
+     ACCOUNT CREATED DATE
+  ====================== */
+
+  createdAt:{
+    type:Date,
+    default:Date.now
+  }
+
 });
 
-// virtual: isLocked
-userSchema.virtual("isLocked").get(function () {
-  if (!this.lockUntil) return false;
-  return this.lockUntil > Date.now();
-});
-
-export default mongoose.model("User", userSchema);
+export default mongoose.model("User",userSchema);
