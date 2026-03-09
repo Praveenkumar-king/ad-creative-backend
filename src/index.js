@@ -21,6 +21,7 @@ import activityRoutes from "./routes/activity.js";
 import adminRoutes from "./routes/admin.js";
 import adminDashboardRoutes from "./routes/adminDashboard.js";
 import deviceRoutes from "./routes/device.js";
+import historyRoutes from "./routes/history.js";
 
 dotenv.config();
 connectDB();
@@ -47,6 +48,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/generate", generateRoute);
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/history", historyRoutes);
 app.use("/api/change-password", changePasswordRoutes);
 app.use("/api/avatar", avatarRoutes);
 app.use("/api/payment", paymentRoutes);
