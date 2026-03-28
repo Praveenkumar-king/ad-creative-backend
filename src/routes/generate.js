@@ -16,34 +16,26 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
 /* ===============================
    📂 MULTER SETUP
 =================================*/
 
 const storage = multer.diskStorage({
-
   destination: (req, file, cb) => {
     cb(null, path.join(__dirname, "../uploads"));
   },
-
   filename: (req, file, cb) => {
-    cb(
-      null,
-      `logo-${Date.now()}${path.extname(file.originalname)}`
-    );
+    cb(null, `logo-${Date.now()}${path.extname(file.originalname)}`);
   }
-
 });
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB
+  limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-
 /* ===============================
-   🎨 GENERATE POSTER (PROTECTED)
+   🎨 GENERATE POSTER
 =================================*/
 
 router.post("/", protect, upload.single("logo"), async (req, res) => {
@@ -58,25 +50,21 @@ router.post("/", protect, upload.single("logo"), async (req, res) => {
       });
     }
 
-    /* GENERATE CAPTION */
+    /* =========================
+       🔥 AI CAPTION ONLY
+    ========================= */
 
     const caption = await generateCaption(
-
       tone
         ? `Write a ${tone} marketing caption for: ${prompt}`
         : prompt
-
     );
 
+    /* =========================
+       IMAGE GENERATION
+    ========================= */
 
-    /* LOGO PATH */
-
-    const logoPath = req.file
-      ? req.file.path
-      : null;
-
-
-    /* GENERATE IMAGE */
+    const logoPath = req.file ? req.file.path : null;
 
     const imageUrl = await generateImage(
       prompt,
@@ -85,53 +73,47 @@ router.post("/", protect, upload.single("logo"), async (req, res) => {
       logoPath
     );
 
-
-    /* SAVE CAMPAIGN */
+    /* =========================
+       SAVE CAMPAIGN
+    ========================= */
 
     const campaign = await Campaign.create({
-
       user: req.user.id,
       prompt,
       caption,
       imageUrl
-
     });
 
-
-    /* SAVE ACTIVITY LOG */
+    /* =========================
+       ACTIVITY LOG
+    ========================= */
 
     await ActivityLog.create({
-
       user: req.user.id,
       action: "generate_ad",
       details: prompt,
       ip: req.ip
-
     });
 
-
     res.json(campaign);
-
 
   } catch (error) {
 
     console.error("GENERATE ERROR:", error);
 
     res.status(500).json({
-      error: "Poster generation failed"
+      error: "AI generation failed"
     });
 
   }
 
 });
 
-
 /* ===============================
-   📜 GET USER HISTORY
+   📜 HISTORY
 =================================*/
 
 router.get("/history", protect, async (req, res) => {
-
   try {
 
     const campaigns = await Campaign
@@ -150,16 +132,13 @@ router.get("/history", protect, async (req, res) => {
     });
 
   }
-
 });
-
 
 /* ===============================
    🗑️ DELETE CAMPAIGN
 =================================*/
 
 router.delete("/campaign/:id", protect, async (req, res) => {
-
   try {
 
     const campaign = await Campaign.findOne({
@@ -181,22 +160,20 @@ router.delete("/campaign/:id", protect, async (req, res) => {
 
   } catch (error) {
 
-    console.error("DELETE CAMPAIGN ERROR:", error);
+    console.error("DELETE ERROR:", error);
 
     res.status(500).json({
       error: "Failed to delete campaign"
     });
 
   }
-
 });
 
 /* ===============================
-   📜 GET SINGLE CAMPAIGN
+   📄 SINGLE CAMPAIGN
 =================================*/
 
 router.get("/campaign/:id", protect, async (req, res) => {
-
   try {
 
     const campaign = await Campaign.findOne({
@@ -219,16 +196,13 @@ router.get("/campaign/:id", protect, async (req, res) => {
     });
 
   }
-
 });
 
-
 /* ===============================
-   ⬇️ DOWNLOAD POSTER
+   ⬇️ DOWNLOAD
 =================================*/
 
 router.get("/download/:filename", async (req, res) => {
-
   try {
 
     const filePath = path.join(
@@ -248,8 +222,6 @@ router.get("/download/:filename", async (req, res) => {
     });
 
   }
-
 });
-
 
 export default router;

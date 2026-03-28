@@ -2,25 +2,33 @@ import axios from "axios";
 
 export const generateCaption = async (prompt) => {
   try {
+
     const response = await axios.post(
-      "http://localhost:11434/api/generate",
+      "https://api.groq.com/openai/v1/chat/completions",
       {
-        model: "phi3",
-        prompt: `Write a short catchy social media caption (max 2 lines, include 2 hashtags): ${prompt}`,
-        stream: false
+        model: "llama-3.1-8b-instant",   // ✅ FIXED MODEL
+        messages: [
+          {
+            role: "user",
+            content: `Write a short catchy social media caption (max 2 lines, include 2 hashtags): ${prompt}`
+          }
+        ]
+      },
+      {
+        headers: {
+          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json"
+        }
       }
     );
 
-    // Clean response
-    const cleanedCaption = response.data.response
-      .replace(/---+/g, "")      // remove dashed lines
-      .replace(/\n{3,}/g, "\n\n") // remove extra blank lines
-      .trim();
-
-    return cleanedCaption;
+    return response.data.choices[0].message.content.trim();
 
   } catch (error) {
-    console.error("Ollama Error:", error.message);
-    throw new Error("Caption generation failed");
+
+    console.error("GROQ ERROR:", error.response?.data || error.message);
+
+    throw new Error("AI caption failed");
+
   }
 };
