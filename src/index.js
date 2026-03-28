@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 
 import { connectDB } from "./config/db.js";
+
 import generateRoute from "./routes/generate.js";
 import authRoutes from "./routes/auth.js";
 import dashboardRoutes from "./routes/dashboard.js";
@@ -36,11 +37,22 @@ app.use(express.json());
 app.use(cookieParser());
 
 /* =========================
-   CORS (IMPORTANT FIX)
+   CORS
 ========================= */
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://ai-ad-creative.netlify.app"
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL,   // Netlify URL
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS not allowed"));
+    }
+  },
   credentials: true
 }));
 
@@ -79,7 +91,7 @@ app.get("/", (req, res) => {
 });
 
 /* =========================
-   CLEANUP JOB
+   CLEANUP JOB (EVERY HOUR)
 ========================= */
 
 setInterval(async () => {
