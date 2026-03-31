@@ -1,18 +1,22 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-export const protect = async (req,res,next)=>{
+export const protect = async (req, res, next) => {
 
-  try{
+  try {
 
-    const token = req.cookies.token;
+    // 🔥 GET TOKEN FROM HEADER (FIX)
+    const authHeader = req.headers.authorization;
 
-    if(!token){
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
-        error:"Not authorized"
+        error: "No token provided"
       });
     }
 
+    const token = authHeader.split(" ")[1];
+
+    // 🔐 VERIFY TOKEN
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET
@@ -20,9 +24,9 @@ export const protect = async (req,res,next)=>{
 
     const user = await User.findById(decoded.id);
 
-    if(!user){
+    if (!user) {
       return res.status(401).json({
-        error:"User not found"
+        error: "User not found"
       });
     }
 
@@ -30,10 +34,10 @@ export const protect = async (req,res,next)=>{
 
     next();
 
-  }catch(err){
+  } catch (err) {
 
     return res.status(401).json({
-      error:"Invalid token"
+      error: "Invalid token"
     });
 
   }
